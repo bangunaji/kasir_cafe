@@ -55,8 +55,10 @@ jobs:
           if [ -f android/app/keystore.jks ]; then
             keytool -list -v -keystore android/app/keystore.jks -alias $KEY_ALIAS -storepass $KEYSTORE_PASSWORD | grep SHA1
           else
-            echo "Keystore not found, falling back to debug report"
-            cd android && ./gradlew signingReport | grep SHA1 || true
+            echo "Keystore not found, showing Debug SHA-1"
+            cd android
+            chmod +x gradlew
+            ./gradlew signingReport | grep -A 5 "Variant: debug" | grep SHA1 || true
           fi
 
       - name: Build APK
