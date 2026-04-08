@@ -18,12 +18,13 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthBloc? authBloc;
+  const MyApp({super.key, this.authBloc});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => AuthBloc()..add(CheckAuthStatus()),
+      create: (context) => authBloc ?? (AuthBloc()..add(CheckAuthStatus())),
       child: MaterialApp(
         title: 'Kasir Cafe',
         theme: AppTheme.lightTheme,
