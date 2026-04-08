@@ -9,6 +9,7 @@ import '../../../domain/entities/product.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_event.dart';
 import '../blocs/auth/auth_state.dart';
+import '../../../domain/entities/sale_transaction.dart';
 import 'login_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
@@ -162,7 +163,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         }
 
                         return DropdownButtonFormField<String>(
-                          value: categoryCtrl.text.isEmpty ? null : categoryCtrl.text,
+                          initialValue: categoryCtrl.text.isEmpty ? null : categoryCtrl.text,
                           items: categories.map((cat) => DropdownMenuItem(
                             value: cat,
                             child: Text(cat),
@@ -568,7 +569,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
                   final transactions = snapshot.data ?? [];
                   
-                  double totalRevenue = transactions.fold(0, (sum, tx) => sum + tx.total);
+                  double totalRevenue = transactions.fold(0.0, (sum, tx) => sum + tx.total);
                   
                   if (transactions.isEmpty) return const Center(child: Text('Belum ada data penjualan pada periode ini.'));
 
