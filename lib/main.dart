@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => authBloc ?? (AuthBloc()..add(CheckAuthStatus())),
       child: MaterialApp(
-        title: 'Kasir Cafe',
+        title: 'Kasir Bangun',
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,
