@@ -261,7 +261,7 @@ class _LoginPageState extends State<LoginPage> {
                 MaterialPageRoute(builder: (_) => const AdminDashboardPage()),
               );
             },
-            child: const Text('Buka Admin Dashboard'),
+            child: const Text('Buka Dasbor Admin'),
           ),
         ],
       ),

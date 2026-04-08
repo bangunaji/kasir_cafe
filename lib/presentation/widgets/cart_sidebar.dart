@@ -59,7 +59,7 @@ class _CartSidebarState extends State<CartSidebar> {
               children: [
                 Expanded(
                   child: const Text(
-                    'Current Order',
+                    'Pesanan Saat Ini',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -89,7 +89,7 @@ class _CartSidebarState extends State<CartSidebar> {
                         Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey.shade400),
                         const SizedBox(height: 16),
                         Text(
-                          'Cart is empty',
+                          'Keranjang kosong',
                           style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
                         ),
                       ],
@@ -192,7 +192,7 @@ class _CartSidebarState extends State<CartSidebar> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Discount', style: TextStyle(color: Colors.grey)),
+                        const Text('Diskon', style: TextStyle(color: Colors.grey)),
                         Text('- ${formatCurrency.format(state.discount)}', style: const TextStyle(color: AppColors.error)),
                       ],
                     ),

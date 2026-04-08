@@ -99,22 +99,41 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(12),
-                          image: selectedImage != null 
-                            ? DecorationImage(image: FileImage(selectedImage!), fit: BoxFit.cover)
-                            : (product?.imageUrl != null && product!.imageUrl.isNotEmpty 
-                                ? DecorationImage(image: NetworkImage(product.imageUrl), fit: BoxFit.cover)
-                                : null),
                         ),
-                        child: selectedImage == null && (product?.imageUrl == null || product!.imageUrl.isEmpty)
-                          ? const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
-                                SizedBox(height: 8),
-                                Text('Tap untuk pilih foto', style: TextStyle(color: Colors.grey)),
-                              ],
+                        child: selectedImage != null 
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(selectedImage!, fit: BoxFit.cover),
                             )
-                          : null,
+                          : (product?.imageUrl != null && product!.imageUrl.isNotEmpty 
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    product!.imageUrl, 
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return const Center(child: CircularProgressIndicator());
+                                    },
+                                    errorBuilder: (context, error, stackTrace) => const Center(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.error_outline, color: Colors.red),
+                                          Text('Gagal memuat gambar', style: TextStyle(fontSize: 10, color: Colors.red)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                                    SizedBox(height: 8),
+                                    Text('Tap untuk pilih foto', style: TextStyle(color: Colors.grey)),
+                                  ],
+                                )),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -143,13 +162,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     
                     // Upload new image if selected
                     if (selectedImage != null) {
-                      // Delete old image if exists
-                      if (product?.imageUrl != null && product!.imageUrl.isNotEmpty) {
-                        await _storageService.deleteImage(product.imageUrl);
-                      }
                       final uploadedUrl = await _storageService.uploadProductImage(selectedImage!);
                       if (uploadedUrl != null) {
                         imageUrl = uploadedUrl;
+                      } else {
+                        // Upload failed
+                        setDialogState(() => isUploading = false);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Gagal mengupload gambar. Periksa koneksi internet Anda.'), backgroundColor: Colors.red),
+                          );
+                        }
+                        return;
                       }
                     }
 
@@ -244,7 +268,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Admin Dashboard'),
+            title: const Text('Dasbor Admin'),
             leading: isMobile ? null : const SizedBox.shrink(), // Remove back button on desktop
             actions: [
               IconButton(

@@ -24,7 +24,7 @@ class PosPage extends StatefulWidget {
 class _PosPageState extends State<PosPage> {
   final FirestoreService _firestoreService = FirestoreService();
   
-  String selectedCategory = 'All Menus';
+  String selectedCategory = 'Semua Menu';
   String searchQuery = '';
   final TextEditingController searchController = TextEditingController();
 
@@ -116,7 +116,7 @@ class _PosPageState extends State<PosPage> {
                                       });
                                     },
                                     decoration: InputDecoration(
-                                      hintText: 'Search menu...',
+                                      hintText: 'Cari menu...',
                                       border: InputBorder.none,
                                       icon: const Icon(Icons.search, color: Colors.grey),
                                       suffixIcon: searchQuery.isNotEmpty
@@ -158,13 +158,13 @@ class _PosPageState extends State<PosPage> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                _buildCategoryChip('All Menus'),
+                                _buildCategoryChip('Semua Menu'),
                                 const SizedBox(width: 12),
-                                _buildCategoryChip('Coffee'),
+                                _buildCategoryChip('Kopi'),
                                 const SizedBox(width: 12),
-                                _buildCategoryChip('Tea'),
+                                _buildCategoryChip('Teh'),
                                 const SizedBox(width: 12),
-                                _buildCategoryChip('Food'),
+                                _buildCategoryChip('Makanan'),
                               ],
                             ),
                           ),
@@ -189,7 +189,7 @@ class _PosPageState extends State<PosPage> {
                                   
                                   // Filter locally
                                   products = products.where((product) {
-                                    final matchesCategory = selectedCategory == 'All Menus' || product.category == selectedCategory;
+                                    final matchesCategory = selectedCategory == 'Semua Menu' || product.category == selectedCategory;
                                     final matchesSearch = product.name.toLowerCase().contains(searchQuery.toLowerCase());
                                     return matchesCategory && matchesSearch;
                                   }).toList();
