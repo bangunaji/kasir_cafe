@@ -226,6 +226,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       await _firestoreService.updateProduct(uid, newProduct);
                     }
 
+                    // Automatically add category to categories list if not exist
+                    if (categoryCtrl.text.isNotEmpty) {
+                      await _firestoreService.addCategory(uid, categoryCtrl.text);
+                    }
+
                     if (context.mounted) Navigator.pop(context);
                   },
                   child: isUploading 
