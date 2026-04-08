@@ -39,6 +39,11 @@ jobs:
       - name: Run Tests
         run: flutter test
 
+      - name: Print Signing Report (for SHA-1)
+        run: |
+          cd android
+          ./gradlew signingReport
+
       - name: Decode Keystore from Secrets
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
