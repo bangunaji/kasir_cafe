@@ -50,18 +50,20 @@ class PosPage extends StatelessWidget {
                             ],
                           ),
                           const Spacer(),
-                          Container(
-                            width: 300,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: AppColors.backgroundLight,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Search menu...',
-                                border: InputBorder.none,
-                                icon: Icon(Icons.search, color: Colors.grey),
+                          Flexible(
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 300),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundLight,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Search menu...',
+                                  border: InputBorder.none,
+                                  icon: Icon(Icons.search, color: Colors.grey),
+                                ),
                               ),
                             ),
                           ),
@@ -72,16 +74,19 @@ class PosPage extends StatelessWidget {
                     // Categories
                     Padding(
                       padding: const EdgeInsets.all(24.0),
-                      child: Row(
-                        children: [
-                          _buildCategoryChip('All Menus', true),
-                          const SizedBox(width: 12),
-                          _buildCategoryChip('Coffee', false),
-                          const SizedBox(width: 12),
-                          _buildCategoryChip('Tea', false),
-                          const SizedBox(width: 12),
-                          _buildCategoryChip('Food', false),
-                        ],
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildCategoryChip('All Menus', true),
+                            const SizedBox(width: 12),
+                            _buildCategoryChip('Coffee', false),
+                            const SizedBox(width: 12),
+                            _buildCategoryChip('Tea', false),
+                            const SizedBox(width: 12),
+                            _buildCategoryChip('Food', false),
+                          ],
+                        ),
                       ),
                     ),
 

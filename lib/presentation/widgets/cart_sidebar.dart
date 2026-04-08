@@ -37,12 +37,15 @@ class CartSidebar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Current Order',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textLight,
+                Expanded(
+                  child: const Text(
+                    'Current Order',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textLight,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 IconButton(
