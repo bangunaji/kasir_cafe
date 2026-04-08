@@ -14,11 +14,14 @@ android {
     ndkVersion = flutter.ndkVersion
 
     signingConfigs {
-        create("release") {
-            keyAlias = System.getenv("KEY_ALIAS")
-            keyPassword = System.getenv("KEY_PASSWORD")
-            storeFile = file("keystore.jks")
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
+        // Hanya buat konfigurasi release jika file keystore ada
+        if (file("keystore.jks").exists()) {
+            create("release") {
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+                storeFile = file("keystore.jks")
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+            }
         }
     }
 
@@ -44,11 +47,10 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            val keystoreFile = file("keystore.jks")
-            if (keystoreFile.exists() && System.getenv("KEYSTORE_PASSWORD") != null) {
-                signingConfig = signingConfigs.getByName("release")
+            // Gunakan signing release jika tersedia, jika tidak gunakan debug
+            val releaseSigning = signingConfigs.findByName("release")
+            if (releaseSigning != null) {
+                signingConfig = releaseSigning
             } else {
                 signingConfig = signingConfigs.getByName("debug")
             }
