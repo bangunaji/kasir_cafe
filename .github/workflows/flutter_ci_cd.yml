@@ -67,9 +67,9 @@ jobs:
             keytool -list -v -keystore android/app/keystore.jks -alias $KEY_ALIAS -storepass $KEYSTORE_PASSWORD | grep -i SHA1
           else
             echo "Keystore not found, generating Debug SHA-1..."
-            mkdir -p ~/.android
-            if [ ! -f ~/.android/debug.keystore ]; then
-                keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+            mkdir -p /home/runner/.config/.android
+            if [ ! -f /home/runner/.config/.android/debug.keystore ]; then
+                keytool -genkey -v -keystore /home/runner/.config/.android/debug.keystore -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
             fi
             cd android
             chmod +x gradlew
