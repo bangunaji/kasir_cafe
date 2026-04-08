@@ -25,7 +25,7 @@ class Product extends Equatable {
       'category': category,
       'price': price,
       'imageUrl': imageUrl,
-      'color': color.value,
+      'color': color.toARGB32(),
     };
   }
 
