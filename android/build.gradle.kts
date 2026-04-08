@@ -21,6 +21,13 @@ subprojects {
         val android = extensions.findByName("android")
         if (android != null) {
             try {
+                android.javaClass.getMethod("setCompileSdkVersion", Int::class.java).invoke(android, 34)
+            } catch (e: Exception) {
+                try {
+                    android.javaClass.getMethod("setCompileSdk", Int::class.java).invoke(android, 34)
+                } catch (e2: Exception) {}
+            }
+            try {
                 val getNamespace = android.javaClass.getMethod("getNamespace")
                 val namespace = getNamespace.invoke(android)
                 if (namespace == null || namespace.toString().isEmpty()) {
