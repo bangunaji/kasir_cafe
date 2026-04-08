@@ -8,7 +8,7 @@ import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   AuthBloc() : super(AuthInitial()) {

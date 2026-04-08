@@ -34,7 +34,6 @@ class StorageService {
   // (usually requires dynamic session or different endpoint)
   // For the sake of simplicity in this POS app, we'll just skip deletion for now
   Future<void> deleteImage(String imageUrl) async {
-    // Optional: Implement if needed, but ImgBB free tier is mainly for hosting
-    print('Deletion on ImgBB not implemented for free tier API');
+    // Deletion on ImgBB not implemented for free tier API
   }
 }
