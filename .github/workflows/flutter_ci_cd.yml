@@ -1,0 +1,84 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Run Linter
+        run: flutter analyze
+
+      - name: Run Tests
+        run: flutter test
+
+      - name: Decode Keystore from Secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/keystore.jks
+          fi
+
+      - name: Build APK
+        env:
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          if [ -f android/app/keystore.jks ]; then
+            flutter build apk --release --build-name=1.0.0 --build-number=${{ github.run_number }} --dart-define=KEY_PASSWORD=$KEY_PASSWORD --dart-define=KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD --dart-define=KEY_ALIAS=$KEY_ALIAS
+          else
+            flutter build apk --release
+          fi
+
+      - name: Build AAB
+        env:
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          if [ -f android/app/keystore.jks ]; then
+            flutter build appbundle --release --build-name=1.0.0 --build-number=${{ github.run_number }}
+          else
+            flutter build appbundle --release
+          fi
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
