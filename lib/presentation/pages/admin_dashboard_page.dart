@@ -165,7 +165,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         return DropdownButtonFormField<String>(
                           isExpanded: true,
                           hint: const Text('Pilih Kategori'),
-                          value: categoryCtrl.text.isEmpty ? null : categoryCtrl.text,
+                          initialValue: categoryCtrl.text.isEmpty ? null : categoryCtrl.text,
                           items: categories.map((cat) => DropdownMenuItem(
                             value: cat,
                             child: Text(cat),
