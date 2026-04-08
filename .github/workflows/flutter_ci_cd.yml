@@ -30,6 +30,16 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Cache Pub Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
       - name: Get Dependencies
         run: flutter pub get
 
@@ -53,12 +63,15 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           if [ -f android/app/keystore.jks ]; then
-            keytool -list -v -keystore android/app/keystore.jks -alias $KEY_ALIAS -storepass $KEYSTORE_PASSWORD | grep SHA1
+            echo "Checking release keystore..."
+            keytool -list -v -keystore android/app/keystore.jks -alias $KEY_ALIAS -storepass $KEYSTORE_PASSWORD | grep -i SHA1
           else
-            echo "Keystore not found, showing Debug SHA-1"
+            echo "Keystore not found, showing Debug SHA-1..."
             cd android
             chmod +x gradlew
-            ./gradlew signingReport | grep -A 5 "Variant: debug" | grep SHA1 || true
+            ./gradlew signingReport | grep -i "SHA1" | sort | uniq | grep -v "null" || true
+            echo "--- Full Signing Report (Debug) ---"
+            ./gradlew signingReport || true
           fi
 
       - name: Build APK
@@ -67,11 +80,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          if [ -f android/app/keystore.jks ]; then
-            flutter build apk --release --build-name=1.0.0 --build-number=${{ github.run_number }} --dart-define=KEY_PASSWORD=$KEY_PASSWORD --dart-define=KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD --dart-define=KEY_ALIAS=$KEY_ALIAS
-          else
-            flutter build apk --release
-          fi
+          flutter build apk --release --build-name=1.0.0 --build-number=${{ github.run_number }}
 
       - name: Build AAB
         env:
@@ -79,11 +88,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          if [ -f android/app/keystore.jks ]; then
-            flutter build appbundle --release --build-name=1.0.0 --build-number=${{ github.run_number }}
-          else
-            flutter build appbundle --release
-          fi
+          flutter build appbundle --release --build-name=1.0.0 --build-number=${{ github.run_number }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
