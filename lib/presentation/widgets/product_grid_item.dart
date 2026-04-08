@@ -44,11 +44,26 @@ class ProductGridItem extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 ),
                 child: Center(
-                  child: Icon(
-                    Icons.fastfood_rounded, // Replace with actual image later
-                    size: 48,
-                    color: product.color,
-                  ),
+                  child: product.imageUrl.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                          child: Image.network(
+                            product.imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.fastfood_rounded,
+                              size: 48,
+                              color: product.color,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.fastfood_rounded,
+                          size: 48,
+                          color: product.color,
+                        ),
                 ),
               ),
             ),
