@@ -17,7 +17,7 @@ subprojects {
 }
 
 subprojects {
-    afterEvaluate {
+    fun overrideAndroidNamespace() {
         val android = extensions.findByName("android")
         if (android != null) {
             try {
@@ -33,6 +33,14 @@ subprojects {
                 }
             } catch (e: Exception) {
             }
+        }
+    }
+
+    if (project.state.executed) {
+        overrideAndroidNamespace()
+    } else {
+        project.afterEvaluate {
+            overrideAndroidNamespace()
         }
     }
 }
