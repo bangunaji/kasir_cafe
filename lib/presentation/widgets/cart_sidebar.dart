@@ -6,6 +6,10 @@ import '../blocs/cart/cart_event.dart';
 import '../blocs/cart/cart_state.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../data/services/firestore_service.dart';
+import '../../../domain/entities/sale_transaction.dart';
+import '../blocs/auth/auth_bloc.dart';
+import '../blocs/auth/auth_state.dart';
 
 class CartSidebar extends StatefulWidget {
   const CartSidebar({super.key});
@@ -16,6 +20,7 @@ class CartSidebar extends StatefulWidget {
 
 class _CartSidebarState extends State<CartSidebar> {
   final TextEditingController _paymentController = TextEditingController();
+  final FirestoreService _firestoreService = FirestoreService();
   final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   @override
@@ -24,12 +29,46 @@ class _CartSidebarState extends State<CartSidebar> {
     super.dispose();
   }
 
-  void _onPaymentSuccess() {
-    context.read<CartBloc>().add(ClearCart());
-    _paymentController.clear();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Pembayaran Berhasil!'), backgroundColor: AppColors.success),
-    );
+  void _onPaymentSuccess() async {
+    final state = context.read<CartBloc>().state;
+    final authState = context.read<AuthBloc>().state;
+    
+    String userId = '';
+    if (authState is AuthenticatedAsOwner) {
+      userId = authState.uid;
+    } else if (authState is AuthenticatedAsKasir) {
+      userId = authState.ownerId;
+    }
+
+    if (userId.isNotEmpty && state.items.isNotEmpty) {
+      final cashReceived = double.tryParse(_paymentController.text) ?? 0.0;
+      final transaction = SaleTransaction(
+        id: '', 
+        items: state.items.map((item) => {
+          'productId': item.product.id,
+          'name': item.product.name,
+          'price': item.product.price,
+          'quantity': item.quantity,
+          'subtotal': item.subtotal,
+        }).toList(),
+        subtotal: state.subtotal,
+        discount: state.discount,
+        total: state.total,
+        cashReceived: cashReceived,
+        change: cashReceived - state.total,
+        createdAt: DateTime.now(),
+      );
+
+      await _firestoreService.saveTransaction(userId, transaction);
+    }
+
+    if (mounted) {
+      context.read<CartBloc>().add(ClearCart());
+      _paymentController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pembayaran Berhasil!'), backgroundColor: AppColors.success),
+      );
+    }
   }
 
   @override

@@ -158,13 +158,18 @@ class _PosPageState extends State<PosPage> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                _buildCategoryChip('Semua Menu'),
-                                const SizedBox(width: 12),
-                                _buildCategoryChip('Kopi'),
-                                const SizedBox(width: 12),
-                                _buildCategoryChip('Teh'),
-                                const SizedBox(width: 12),
-                                _buildCategoryChip('Makanan'),
+                                StreamBuilder<List<String>>(
+                                  stream: _firestoreService.getCategories(ownerId),
+                                  builder: (context, snapshot) {
+                                    final categories = ['Semua Menu', ...(snapshot.data ?? [])];
+                                    return Row(
+                                      children: categories.map((cat) => Padding(
+                                        padding: const EdgeInsets.only(right: 12.0),
+                                        child: _buildCategoryChip(cat),
+                                      )).toList(),
+                                    );
+                                  }
+                                ),
                               ],
                             ),
                           ),
