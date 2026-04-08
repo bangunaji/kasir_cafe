@@ -182,7 +182,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
-  Widget _buildSidebar() {
+  Widget _buildSidebar(BuildContext context) {
     return Container(
       width: 250,
       color: AppColors.cardLight,
@@ -197,8 +197,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             leading: const Icon(Icons.security, color: Colors.grey),
             title: const Text('Pengaturan PIN Kasir'),
             onTap: () {
-              // Close drawer if it's open (for mobile)
-              if (Scaffold.of(context).isDrawerOpen) {
+              final scaffold = Scaffold.maybeOf(context);
+              if (scaffold != null && scaffold.isDrawerOpen) {
                 Navigator.pop(context);
               }
               _showPinDialog();
@@ -258,11 +258,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               )
             ],
           ),
-          drawer: isMobile ? Drawer(child: _buildSidebar()) : null,
+          drawer: isMobile ? Drawer(child: Builder(builder: (context) => _buildSidebar(context))) : null,
           body: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (!isMobile) _buildSidebar(),
+              if (!isMobile) Builder(builder: (context) => _buildSidebar(context)),
               
               Expanded(
                 child: Padding(
