@@ -248,21 +248,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       child: Column(
         children: [
           _buildSidebarItem(
+            context,
             icon: Icons.inventory, 
             label: 'Daftar Produk', 
             view: 'produk',
           ),
           _buildSidebarItem(
+            context,
             icon: Icons.category, 
             label: 'Kelola Kategori', 
             view: 'kategori',
           ),
           _buildSidebarItem(
+            context,
             icon: Icons.bar_chart, 
             label: 'Laporan Penjualan', 
             view: 'laporan',
           ),
           _buildSidebarItem(
+            context,
             icon: Icons.security, 
             label: 'PIN Kasir', 
             view: 'pin',
@@ -272,7 +276,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
-  Widget _buildSidebarItem({required IconData icon, required String label, required String view}) {
+  Widget _buildSidebarItem(BuildContext context, {required IconData icon, required String label, required String view}) {
     bool isSelected = _selectedMenu == view;
     return ListTile(
       leading: Icon(icon, color: isSelected ? AppColors.primary : Colors.grey),
@@ -282,9 +286,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       )),
       selected: isSelected,
       onTap: () {
-        if (Scaffold.of(context).isDrawerOpen) {
+        final scaffold = Scaffold.maybeOf(context);
+        if (scaffold != null && scaffold.isDrawerOpen) {
           Navigator.pop(context);
         }
+        
         if (view == 'pin') {
           _showPinDialog();
         } else {
