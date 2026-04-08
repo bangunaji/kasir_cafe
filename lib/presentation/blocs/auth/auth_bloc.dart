@@ -31,10 +31,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       final googleUser = await _googleSignIn.authenticate();
-      if (googleUser == null) {
-        emit(AuthInitial());
-        return;
-      }
       final googleAuth = googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: null, // Basic auth doesn't require accessToken in this custom/v7+ setup
