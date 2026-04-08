@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "454072033057",
+    "project_id": "kasir-cafe-2e45b",
+    "storage_bucket": "kasir-cafe-2e45b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:454072033057:android:dc437c0aec6d5b85b6e860",
+        "android_client_info": {
+          "package_name": "com.example.kasir_cafe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjYxU9BRS1KzgycMCQVv8S12sb97w1tFk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

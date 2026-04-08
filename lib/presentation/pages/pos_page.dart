@@ -9,7 +9,7 @@ import '../../../domain/entities/product.dart';
 import '../../../core/theme/app_colors.dart';
 
 class PosPage extends StatelessWidget {
-  PosPage({Key? key}) : super(key: key);
+  PosPage({super.key});
 
   // Dummy products
   final List<Product> dummyProducts = [
@@ -139,7 +139,7 @@ class PosPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: isSelected ? [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           )

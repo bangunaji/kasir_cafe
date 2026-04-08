@@ -8,7 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class CartSidebar extends StatelessWidget {
-  const CartSidebar({Key? key}) : super(key: key);
+  const CartSidebar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class CartSidebar extends StatelessWidget {
         color: AppColors.cardLight,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             offset: const Offset(-2, 0),
             blurRadius: 10,
           ),
@@ -31,7 +31,7 @@ class CartSidebar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
             child: Row(
@@ -85,7 +85,7 @@ class CartSidebar extends StatelessWidget {
                           width: 50,
                           height: 50,
                           decoration: BoxDecoration(
-                            color: item.product.color.withOpacity(0.2),
+                            color: item.product.color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(Icons.fastfood, color: item.product.color),
@@ -144,7 +144,7 @@ class CartSidebar extends StatelessWidget {
                   color: AppColors.cardLight,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       offset: const Offset(0, -2),
                       blurRadius: 10,
                     ),
