@@ -103,13 +103,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         child: selectedImage != null 
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(selectedImage!, fit: BoxFit.cover),
+                              child: Image.file(selectedImage, fit: BoxFit.cover),
                             )
                           : (product?.imageUrl != null && product!.imageUrl.isNotEmpty 
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
                                   child: Image.network(
-                                    product!.imageUrl, 
+                                    product.imageUrl, 
                                     fit: BoxFit.cover,
                                     loadingBuilder: (context, child, loadingProgress) {
                                       if (loadingProgress == null) return child;
