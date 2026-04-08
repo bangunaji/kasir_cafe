@@ -163,13 +163,22 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                         }
 
                         return DropdownButtonFormField<String>(
-                          initialValue: categoryCtrl.text.isEmpty ? null : categoryCtrl.text,
+                          isExpanded: true,
+                          hint: const Text('Pilih Kategori'),
+                          value: categoryCtrl.text.isEmpty ? null : categoryCtrl.text,
                           items: categories.map((cat) => DropdownMenuItem(
                             value: cat,
                             child: Text(cat),
                           )).toList(),
-                          onChanged: (val) => categoryCtrl.text = val ?? '',
-                          decoration: const InputDecoration(labelText: 'Pilih Kategori'),
+                          onChanged: (val) {
+                            setDialogState(() {
+                              categoryCtrl.text = val ?? '';
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            labelText: 'Kategori',
+                            border: OutlineInputBorder(),
+                          ),
                         );
                       }
                     ),

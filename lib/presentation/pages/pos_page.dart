@@ -194,7 +194,10 @@ class _PosPageState extends State<PosPage> {
                                   
                                   // Filter locally
                                   products = products.where((product) {
-                                    final matchesCategory = selectedCategory == 'Semua Menu' || product.category == selectedCategory;
+                                    final normalizedProductCat = product.category.toLowerCase().trim();
+                                    final normalizedSelectedCat = selectedCategory.toLowerCase().trim();
+                                    
+                                    final matchesCategory = selectedCategory == 'Semua Menu' || normalizedProductCat == normalizedSelectedCat;
                                     final matchesSearch = product.name.toLowerCase().contains(searchQuery.toLowerCase());
                                     return matchesCategory && matchesSearch;
                                   }).toList();
