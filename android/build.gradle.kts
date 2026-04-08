@@ -16,6 +16,27 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+subprojects {
+    afterEvaluate {
+        val android = extensions.findByName("android")
+        if (android != null) {
+            try {
+                val getNamespace = android.javaClass.getMethod("getNamespace")
+                val namespace = getNamespace.invoke(android)
+                if (namespace == null || namespace.toString().isEmpty()) {
+                    val setNamespace = android.javaClass.getMethod("setNamespace", String::class.java)
+                    var groupString = project.group.toString()
+                    if (groupString.isEmpty()) {
+                        groupString = "com.kasir.plugin_" + project.name.replace("-", "_")
+                    }
+                    setNamespace.invoke(android, groupString)
+                }
+            } catch (e: Exception) {
+            }
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
