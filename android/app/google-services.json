@@ -12,7 +12,20 @@
           "package_name": "com.example.kasir_cafe"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "454072033057-j8ksd6pse2kt1hkf0uio4obpt4u12lml.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.kasir_cafe",
+            "certificate_hash": "90efe2031ab541596f1acc4449f671711a681fb1"
+          }
+        },
+        {
+          "client_id": "454072033057-2du8p6amh1i00ltt8jedt65qv9l9koc8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCjYxU9BRS1KzgycMCQVv8S12sb97w1tFk"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "454072033057-2du8p6amh1i00ltt8jedt65qv9l9koc8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "454072033057-uiq9vidip6ght854jrfv6ofpg0odkp9l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kasirCafe"
+              }
+            }
+          ]
         }
       }
     }

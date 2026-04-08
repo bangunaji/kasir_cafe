@@ -18,6 +18,28 @@ class Product extends Equatable {
     this.color = const Color(0xFFFF6F00),
   });
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'price': price,
+      'imageUrl': imageUrl,
+      'color': color.value,
+    };
+  }
+
+  factory Product.fromMap(Map<String, dynamic> map, String docId) {
+    return Product(
+      id: docId,
+      name: map['name'] ?? '',
+      category: map['category'] ?? '',
+      price: (map['price'] ?? 0).toDouble(),
+      imageUrl: map['imageUrl'] ?? '',
+      color: map['color'] != null ? Color(map['color'] as int) : const Color(0xFFFF6F00),
+    );
+  }
+
   @override
   List<Object?> get props => [id, name, category, price, imageUrl, color];
 }

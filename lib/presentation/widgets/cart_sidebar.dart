@@ -7,13 +7,33 @@ import '../blocs/cart/cart_state.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-class CartSidebar extends StatelessWidget {
+class CartSidebar extends StatefulWidget {
   const CartSidebar({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  State<CartSidebar> createState() => _CartSidebarState();
+}
 
+class _CartSidebarState extends State<CartSidebar> {
+  final TextEditingController _paymentController = TextEditingController();
+  final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+  @override
+  void dispose() {
+    _paymentController.dispose();
+    super.dispose();
+  }
+
+  void _onPaymentSuccess() {
+    context.read<CartBloc>().add(ClearCart());
+    _paymentController.clear();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Pembayaran Berhasil!'), backgroundColor: AppColors.success),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 350,
       decoration: BoxDecoration(
@@ -52,6 +72,7 @@ class CartSidebar extends StatelessWidget {
                   icon: const Icon(Icons.delete_outline, color: AppColors.error),
                   onPressed: () {
                     context.read<CartBloc>().add(ClearCart());
+                    _paymentController.clear();
                   },
                 ),
               ],
@@ -141,6 +162,11 @@ class CartSidebar extends StatelessWidget {
           ),
           BlocBuilder<CartBloc, CartState>(
             builder: (context, state) {
+              
+              double cashReceived = double.tryParse(_paymentController.text) ?? 0;
+              double change = cashReceived - state.total;
+              bool isValidPayment = state.items.isNotEmpty && cashReceived >= state.total;
+
               return Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -170,7 +196,7 @@ class CartSidebar extends StatelessWidget {
                         Text('- ${formatCurrency.format(state.discount)}', style: const TextStyle(color: AppColors.error)),
                       ],
                     ),
-                    const Divider(height: 24),
+                    const Divider(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -181,23 +207,53 @@ class CartSidebar extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
+                    
+                    // Payment Section
+                    if (state.items.isNotEmpty) ...[
+                      TextField(
+                        controller: _paymentController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Uang Diterima',
+                          prefixText: 'Rp ',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        onChanged: (value) {
+                          setState(() {}); // Trigger rebuild to update change
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Kembalian', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text(
+                            change >= 0 ? formatCurrency.format(change) : 'Uang Kurang',
+                            style: TextStyle(
+                              fontSize: 18, 
+                              fontWeight: FontWeight.bold, 
+                              color: change >= 0 ? AppColors.success : AppColors.error
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: isValidPayment ? AppColors.primary : Colors.grey,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         ),
-                        onPressed: state.items.isEmpty ? null : () {
-                          // Handle payment
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Proceeding to payment...')),
-                          );
-                        },
+                        onPressed: isValidPayment ? _onPaymentSuccess : null,
                         child: const Text(
-                          'Payment',
+                          'Selesaikan Pembayaran',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
@@ -212,3 +268,4 @@ class CartSidebar extends StatelessWidget {
     );
   }
 }
+
