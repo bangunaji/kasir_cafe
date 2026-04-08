@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive/hive.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -29,10 +30,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onSignInWithGoogle(SignInWithGoogleEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final googleUser = await _googleSignIn.authenticate();
-      final googleAuth = googleUser.authentication;
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        emit(AuthInitial());
+        return;
+      }
+      final googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: null, // Basic auth doesn't require accessToken in v7+
+        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
@@ -40,6 +45,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = userCredential.user;
 
       if (user != null) {
+        // Save UID to Hive for Kasir login reference
+        final box = Hive.box('settings');
+        await box.put('lastOwnerId', user.uid);
+        
         emit(AuthenticatedAsOwner(uid: user.uid, email: user.email ?? ''));
       } else {
         emit(const AuthError("Failed to login with Google."));
@@ -52,18 +61,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onSignInWithPin(SignInWithPinEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      // Get PIN from firestore settings/kasir_pin document
-      final doc = await _firestore.collection('settings').doc('kasir_pin').get();
-      String correctPin = '1234'; // fallback
+      final box = Hive.box('settings');
+      final String? lastOwnerId = box.get('lastOwnerId');
+      
+      if (lastOwnerId == null) {
+        emit(const AuthError("Owner harus login sekali di perangkat ini terlebih dahulu."));
+        return;
+      }
+
+      // Get PIN from the OWNER'S settings document
+      final doc = await _firestore
+          .collection('users')
+          .doc(lastOwnerId)
+          .collection('settings')
+          .doc('config')
+          .get();
+          
+      String correctPin = '1234'; // default
       if (doc.exists && doc.data() != null && doc.data()!.containsKey('pin')) {
         correctPin = doc.data()!['pin'].toString();
-      } else {
-        // If it doesn't exist, create it with 1234
-        await _firestore.collection('settings').doc('kasir_pin').set({'pin': '1234'});
       }
 
       if (event.pin == correctPin) {
-        emit(AuthenticatedAsKasir());
+        emit(AuthenticatedAsKasir(ownerId: lastOwnerId));
       } else {
         emit(const AuthError("PIN Salah"));
       }

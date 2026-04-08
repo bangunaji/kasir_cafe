@@ -6,6 +6,7 @@ import '../blocs/cart/cart_event.dart';
 import '../blocs/cart/cart_state.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_event.dart';
+import '../blocs/auth/auth_state.dart';
 import '../widgets/product_grid_item.dart';
 import '../widgets/cart_sidebar.dart';
 import '../../../domain/entities/product.dart';
@@ -40,8 +41,20 @@ class _PosPageState extends State<PosPage> {
     );
   }
 
+  String get _currentOwnerId {
+    final state = context.read<AuthBloc>().state;
+    if (state is AuthenticatedAsOwner) {
+      return state.uid;
+    } else if (state is AuthenticatedAsKasir) {
+      return state.ownerId;
+    }
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ownerId = _currentOwnerId;
+
     return BlocProvider(
       create: (context) => CartBloc(),
       child: ResponsiveBuilder(
@@ -159,60 +172,62 @@ class _PosPageState extends State<PosPage> {
 
                         // Grid
                         Expanded(
-                          child: StreamBuilder<List<Product>>(
-                            stream: _firestoreService.getProducts(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Center(child: CircularProgressIndicator());
-                              }
-                              
-                              if (snapshot.hasError) {
-                                return Center(child: Text('Terjadi kesalahan: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
-                              }
+                          child: ownerId.isEmpty 
+                            ? const Center(child: Text('Data toko tidak ditemukan.'))
+                            : StreamBuilder<List<Product>>(
+                                stream: _firestoreService.getProducts(ownerId),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const Center(child: CircularProgressIndicator());
+                                  }
+                                  
+                                  if (snapshot.hasError) {
+                                    return Center(child: Text('Terjadi kesalahan: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+                                  }
 
-                              List<Product> products = snapshot.data ?? [];
-                              
-                              // Filter locally
-                              products = products.where((product) {
-                                final matchesCategory = selectedCategory == 'All Menus' || product.category == selectedCategory;
-                                final matchesSearch = product.name.toLowerCase().contains(searchQuery.toLowerCase());
-                                return matchesCategory && matchesSearch;
-                              }).toList();
+                                  List<Product> products = snapshot.data ?? [];
+                                  
+                                  // Filter locally
+                                  products = products.where((product) {
+                                    final matchesCategory = selectedCategory == 'All Menus' || product.category == selectedCategory;
+                                    final matchesSearch = product.name.toLowerCase().contains(searchQuery.toLowerCase());
+                                    return matchesCategory && matchesSearch;
+                                  }).toList();
 
-                              if (products.isEmpty) {
-                                return const Center(
-                                  child: Text('Belum ada produk atau produk tidak ditemukan.', style: TextStyle(color: Colors.grey, fontSize: 16)),
-                                );
-                              }
+                                  if (products.isEmpty) {
+                                    return const Center(
+                                      child: Text('Belum ada produk atau produk tidak ditemukan.', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                                    );
+                                  }
 
-                              int crossAxisCount = 2; // Default for mobile
-                              if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-                                crossAxisCount = 5;
-                              } else if (sizingInformation.deviceScreenType == DeviceScreenType.tablet) {
-                                crossAxisCount = 4;
-                              }
+                                  int crossAxisCount = 2; // Default for mobile
+                                  if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
+                                    crossAxisCount = 5;
+                                  } else if (sizingInformation.deviceScreenType == DeviceScreenType.tablet) {
+                                    crossAxisCount = 4;
+                                  }
 
-                              return GridView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 24).copyWith(bottom: isMobile ? 80 : 24),
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: crossAxisCount,
-                                  childAspectRatio: 0.8,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                ),
-                                itemCount: products.length,
-                                itemBuilder: (context, index) {
-                                  final product = products[index];
-                                  return ProductGridItem(
-                                    product: product,
-                                    onTap: () {
-                                      context.read<CartBloc>().add(AddToCart(product));
+                                  return GridView.builder(
+                                    padding: const EdgeInsets.symmetric(horizontal: 24).copyWith(bottom: isMobile ? 80 : 24),
+                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: crossAxisCount,
+                                      childAspectRatio: 0.8,
+                                      crossAxisSpacing: 16,
+                                      mainAxisSpacing: 16,
+                                    ),
+                                    itemCount: products.length,
+                                    itemBuilder: (context, index) {
+                                      final product = products[index];
+                                      return ProductGridItem(
+                                        product: product,
+                                        onTap: () {
+                                          context.read<CartBloc>().add(AddToCart(product));
+                                        },
+                                      );
                                     },
                                   );
                                 },
-                              );
-                            },
-                          ),
+                              ),
                         ),
                       ],
                     ),
@@ -285,4 +300,3 @@ class _PosPageState extends State<PosPage> {
     );
   }
 }
-

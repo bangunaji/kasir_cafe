@@ -21,11 +21,11 @@ class StorageService {
         // Return the display URL from ImgBB response
         return response.data['data']['url'];
       } else {
-        print('ImgBB Upload failed: ${response.statusMessage}');
+        // ImgBB Upload failed: ${response.statusMessage}
         return null;
       }
     } catch (e) {
-      print('Error uploading to ImgBB: $e');
+      // Error uploading to ImgBB: $e
       return null;
     }
   }

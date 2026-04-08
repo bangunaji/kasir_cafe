@@ -8,6 +8,7 @@ import '../../../data/services/storage_service.dart';
 import '../../../domain/entities/product.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_event.dart';
+import '../blocs/auth/auth_state.dart';
 import 'login_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
@@ -29,16 +30,30 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     _loadKasirPin();
   }
 
+  String get _currentUid {
+    final state = context.read<AuthBloc>().state;
+    if (state is AuthenticatedAsOwner) {
+      return state.uid;
+    }
+    return '';
+  }
+
   Future<void> _loadKasirPin() async {
-    final pin = await _firestoreService.getKasirPin();
+    final uid = _currentUid;
+    if (uid.isEmpty) return;
+    
+    final pin = await _firestoreService.getKasirPin(uid);
     setState(() {
       _pinController.text = pin;
     });
   }
 
   Future<void> _saveKasirPin() async {
+    final uid = _currentUid;
+    if (uid.isEmpty) return;
+
     if (_pinController.text.isNotEmpty) {
-      await _firestoreService.updateKasirPin(_pinController.text);
+      await _firestoreService.updateKasirPin(uid, _pinController.text);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('PIN Kasir berhasil diperbarui')),
@@ -48,6 +63,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   void _showAddEditProductDialog({Product? product}) {
+    final uid = _currentUid;
+    if (uid.isEmpty) return;
+
     final nameCtrl = TextEditingController(text: product?.name);
     final categoryCtrl = TextEditingController(text: product?.category ?? 'Coffee');
     final priceCtrl = TextEditingController(text: product?.price.toString() ?? '');
@@ -145,9 +163,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     );
 
                     if (product == null) {
-                      await _firestoreService.addProduct(newProduct);
+                      await _firestoreService.addProduct(uid, newProduct);
                     } else {
-                      await _firestoreService.updateProduct(newProduct);
+                      await _firestoreService.updateProduct(uid, newProduct);
                     }
 
                     if (context.mounted) Navigator.pop(context);
@@ -218,6 +236,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final uid = _currentUid;
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool isMobile = constraints.maxWidth < 800;
@@ -264,61 +284,63 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                       ),
                       const SizedBox(height: 24),
                       Expanded(
-                        child: StreamBuilder<List<Product>>(
-                          stream: _firestoreService.getProducts(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Center(child: CircularProgressIndicator());
-                            }
-                            if (snapshot.hasError) {
-                              return Center(child: Text('Error: ${snapshot.error}'));
-                            }
-                            final products = snapshot.data ?? [];
-                            if (products.isEmpty) {
-                              return const Center(child: Text('Belum ada produk. Tambahkan sekarang!'));
-                            }
+                        child: uid.isEmpty 
+                          ? const Center(child: Text('User ID tidak ditemukan. Harap login ulang.'))
+                          : StreamBuilder<List<Product>>(
+                              stream: _firestoreService.getProducts(uid),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const Center(child: CircularProgressIndicator());
+                                }
+                                if (snapshot.hasError) {
+                                  return Center(child: Text('Error: ${snapshot.error}'));
+                                }
+                                final products = snapshot.data ?? [];
+                                if (products.isEmpty) {
+                                  return const Center(child: Text('Belum ada produk. Tambahkan sekarang!'));
+                                }
 
-                            return ListView.builder(
-                              itemCount: products.length,
-                              itemBuilder: (context, index) {
-                                final p = products[index];
-                                return Card(
-                                  child: ListTile(
-                                    leading: Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: p.color.withOpacity(0.1),
-                                      ),
-                                      child: p.imageUrl.isNotEmpty
-                                        ? ClipRRect(
+                                return ListView.builder(
+                                  itemCount: products.length,
+                                  itemBuilder: (context, index) {
+                                    final p = products[index];
+                                    return Card(
+                                      child: ListTile(
+                                        leading: Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(8),
-                                            child: Image.network(p.imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.fastfood, color: AppColors.primary)),
-                                          )
-                                        : const Icon(Icons.fastfood, color: AppColors.primary),
-                                    ),
-                                    title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    subtitle: Text('${p.category} - Rp ${p.price.toStringAsFixed(0)}'),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit, color: Colors.blue),
-                                          onPressed: () => _showAddEditProductDialog(product: p),
+                                            color: p.color.withValues(alpha: 0.1),
+                                          ),
+                                          child: p.imageUrl.isNotEmpty
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: Image.network(p.imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.fastfood, color: AppColors.primary)),
+                                              )
+                                            : const Icon(Icons.fastfood, color: AppColors.primary),
                                         ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete, color: Colors.red),
-                                          onPressed: () => _firestoreService.deleteProduct(p.id),
+                                        title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        subtitle: Text('${p.category} - Rp ${p.price.toStringAsFixed(0)}'),
+                                        trailing: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit, color: Colors.blue),
+                                              onPressed: () => _showAddEditProductDialog(product: p),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete, color: Colors.red),
+                                              onPressed: () => _firestoreService.deleteProduct(uid, p.id),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
-                            );
-                          },
-                        ),
+                            ),
                       ),
                     ],
                   ),

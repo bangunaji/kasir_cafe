@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/blocs/auth/auth_bloc.dart';
@@ -14,6 +15,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await GoogleSignIn.instance.initialize();
+  
+  // Initialize Hive for Multi-tenant support
+  await Hive.initFlutter();
+  await Hive.openBox('settings');
+  
   runApp(const MyApp());
 }
 

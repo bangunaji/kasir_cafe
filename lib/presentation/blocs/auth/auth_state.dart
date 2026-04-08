@@ -21,7 +21,14 @@ class AuthenticatedAsOwner extends AuthState {
   List<Object?> get props => [uid, email];
 }
 
-class AuthenticatedAsKasir extends AuthState {}
+class AuthenticatedAsKasir extends AuthState {
+  final String ownerId;
+
+  const AuthenticatedAsKasir({required this.ownerId});
+
+  @override
+  List<Object?> get props => [ownerId];
+}
 
 class AuthError extends AuthState {
   final String message;
